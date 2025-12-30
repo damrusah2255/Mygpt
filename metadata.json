@@ -1,0 +1,7 @@
+{
+  "name": "Dambru AI: Multimodal Companion",
+  "description": "A sophisticated AI companion featuring a 3D avatar that adapts its personality and voice based on your chosen mood. Powered by Gemini Live API for real-time voice conversations and Gemini Pro for deep search research.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
