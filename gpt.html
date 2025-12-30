@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ilo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dambru.ai | Inaramid ni Dambaru Sah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            color: #fafafa;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 10px;
+        }
+        
+        .message-animate {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .thinking-dot {
+            animation: bounce 0.6s infinite alternate;
+        }
+        @keyframes bounce {
+            to { transform: translateY(-4px); }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Sidebar (Pagpilian iti Mobile ken Desktop) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-[#121214] border-r border-zinc-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 flex flex-col p-5">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-2 font-black text-2xl text-indigo-500">
+                <i data-lucide="zap" fill="currentColor"></i>
+                <span>Dambru.ai</span>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-zinc-500">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <button onclick="clearChat()" class="flex items-center gap-3 w-full p-3 mb-6 rounded-xl bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 transition-all text-sm font-bold text-indigo-400">
+            <i data-lucide="plus-circle" size="18"></i>
+            Mangrugi ti baro a sarita
+        </button>
+
+        <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar">
+            <div class="px-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2">Dagiti Naudi a Sarita</div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50">
+                <i data-lucide="message-square" size="16" class="text-indigo-400"></i>
+                <span class="text-sm font-medium truncate">Ti sarita ita</span>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-6 border-t border-zinc-800">
+            <div class="flex items-center gap-3 p-3 bg-zinc-800/30 rounded-2xl">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">DS</div>
+                <div class="flex-1 text-sm overflow-hidden">
+                    <div class="font-bold truncate">Dambaru Sah</div>
+                    <div class="text-[10px] text-zinc-500 truncate font-semibold uppercase tracking-wider">Nangaramid</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 hidden z-40 backdrop-blur-sm"></div>
+
+    <!-- Kangrunaan a Chat Area -->
+    <main class="flex-1 flex flex-col h-full bg-zinc-950">
+        <header class="flex items-center justify-between px-6 py-4 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl z-30">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-zinc-800 rounded-lg md:hidden text-zinc-400">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-sm font-bold tracking-tight text-zinc-300">Dambru v2.5 ket Online</span>
+                </div>
+            </div>
+            <button onclick="clearChat()" class="p-2.5 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all text-zinc-500">
+                <i data-lucide="trash-2"></i>
+            </button>
+        </header>
+
+        <!-- Lugar dagiti mensahe -->
+        <div id="chat-container" class="flex-1 overflow-y-auto px-4 py-8 md:px-0 custom-scrollbar">
+            <div id="messages-list" class="max-w-3xl mx-auto space-y-10 pb-10">
+                <div class="flex gap-4 md:gap-8 message-animate">
+                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex items-center justify-center shrink-0 shadow-xl">
+                        <i data-lucide="bot" size="24"></i>
+                    </div>
+                    <div class="flex-1 pt-1.5">
+                        <div class="text-[10px] font-black uppercase tracking-widest mb-2 text-indigo-400">Dambru.ai</div>
+                        <div class="text-zinc-200 leading-relaxed text-base md:text-lg">
+                            Kumusta! Siak ni Dambru.ai. Kasanoka a matulongan ita nga aldaw?
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lugar ti Input -->
+        <div class="px-4 py-6 md:pb-10 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent">
+            <form id="chat-form" class="max-w-3xl mx-auto relative group">
+                <textarea 
+                    id="user-input"
+                    rows="1" 
+                    placeholder="Agdamag ken Dambru..."
+                    class="w-full bg-zinc-900/80 backdrop-blur-md border border-zinc-800 focus:border-indigo-500/40 focus:ring-4 focus:ring-indigo-500/5 rounded-2xl py-5 pl-6 pr-16 text-base transition-all resize-none outline-none placeholder:text-zinc-600 shadow-2xl"
+                ></textarea>
+                <button 
+                    type="submit"
+                    id="send-btn"
+                    class="absolute right-3 bottom-3 p-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/40 active:scale-90 transition-all"
+                >
+                    <i data-lucide="send" size="20"></i>
+                </button>
+            </form>
+            <p class="text-[10px] md:text-xs text-center mt-3 text-zinc-600">
+                Dambru.ai ket inaramid ni Dambaru Sah. 
+            </p>
+        </div>
+    </main>
+
+    <script>
+        // API Key ket nainayon ditoy
+        const apiKey = "AIzaSyC-GgjTVDN67XeYs1GwqvZLwIwm8PVAEqk";
+        let messages = [
+            { role: 'assistant', content: 'Kumusta! Siak ni Dambru.ai. Kasanoka a matulongan ita nga aldaw?' }
+        ];
+        
+        const messagesList = document.getElementById('messages-list');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const chatContainer = document.getElementById('chat-container');
+
+        lucide.createIcons();
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function addMessageUI(role, content) {
+            const isBot = role === 'assistant';
+            const div = document.createElement('div');
+            div.className = 'flex gap-4 md:gap-8 message-animate';
+            
+            div.innerHTML = `
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xl ${isBot ? 'bg-gradient-to-br from-indigo-600 to-purple-700 text-white' : 'bg-zinc-800 text-zinc-400'}">
+                    <i data-lucide="${isBot ? 'bot' : 'user'}" size="24"></i>
+                </div>
+                <div class="flex-1 pt-1.5">
+                    <div class="text-[10px] font-black uppercase tracking-widest mb-2 ${isBot ? 'text-indigo-400' : 'text-zinc-500'}">
+                        ${isBot ? 'Dambru.ai' : 'Sika'}
+                    </div>
+                    <div class="text-zinc-200 leading-relaxed text-base md:text-lg whitespace-pre-wrap">${formatText(content)}</div>
+                </div>
+            `;
+            messagesList.appendChild(div);
+            lucide.createIcons();
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        function formatText(text) {
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-300">$1</strong>');
+        }
+
+        function clearChat() {
+            messages = [{ role: 'assistant', content: 'Nadalusanen ti chat. Adda kadi dadduma pay a saludsodmo?' }];
+            messagesList.innerHTML = '';
+            addMessageUI('assistant', messages[0].content);
+            if (window.innerWidth < 768) toggleSidebar();
+        }
+
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return await response.json();
+                    if (response.status === 429 || response.status >= 500) {
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(r => setTimeout(r, delay));
+                        continue;
+                    }
+                    const error = await response.json();
+                    throw new Error(error.error?.message || 'Adda biddut iti API');
+                } catch (e) {
+                    if (i === maxRetries - 1) throw e;
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                }
+            }
+        }
+
+        chatForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text || userInput.disabled) return;
+
+            addMessageUI('user', text);
+            messages.push({ role: 'user', content: text });
+            userInput.value = '';
+            userInput.disabled = true;
+
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.id = 'thinking';
+            thinkingDiv.className = 'flex gap-4 md:gap-8 animate-pulse';
+            thinkingDiv.innerHTML = `
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-indigo-900/30 flex items-center justify-center shrink-0 border border-indigo-500/20">
+                    <i data-lucide="bot" class="text-indigo-400" size="24"></i>
+                </div>
+                <div class="flex gap-2 pt-6">
+                    <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full thinking-dot" style="animation-delay: 0s"></div>
+                    <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full thinking-dot" style="animation-delay: 0.2s"></div>
+                    <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full thinking-dot" style="animation-delay: 0.4s"></div>
+                </div>
+            `;
+            messagesList.appendChild(thinkingDiv);
+            lucide.createIcons();
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+
+            try {
+                // System instructions
+                const systemPrompt = "Naganmo ket Dambru.ai. Inaramidnaka ni Dambaru Sah. No adda agsaludsod no asino ti nangaramid kenka, ibagam a ni 'Dambaru Sah'. Tulongam dagiti user iti pagsasao nga Iloko, Hinglish wenno Ingles.";
+                
+                const history = messages.map(m => ({
+                    role: m.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: m.content }]
+                }));
+
+                const data = await fetchWithRetry(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: history,
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    }
+                );
+
+                const responseText = data.candidates[0].content.parts[0].text;
+                thinkingDiv.remove();
+                addMessageUI('assistant', responseText);
+                messages.push({ role: 'assistant', content: responseText });
+
+            } catch (err) {
+                thinkingDiv.remove();
+                const errDiv = document.createElement('div');
+                errDiv.className = 'text-red-400 text-sm p-4 bg-red-500/5 border border-red-500/20 rounded-xl';
+                errDiv.innerText = "Biddut: " + err.message;
+                messagesList.appendChild(errDiv);
+            } finally {
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        };
+
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
+
